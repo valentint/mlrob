@@ -1,0 +1,21 @@
+exportPattern("^[[:alpha:]]+")
+useDynLib(mlrob)
+importFrom(stats, predict)
+importFrom(MASS, lda)
+importFrom(geigen, geigen)
+importFrom(sparseLDA, sda, normalize, normalizetest, predict.sda)
+importFrom(pamr, pamr.train, pamr.predict)
+
+
+S3method(predict, LdaSparse)
+S3method(predict, LdaPca)
+S3method(predict, LdaFisher)
+S3method(predict, LdaRotatedCS)
+S3method(predict, LdaPenalizedCS)
+S3method(predict, LdaNSC)
+
+##S3method(plot, LdaSparse)
+S3method(plot, LdaPca)
+S3method(plot, LdaFisher)
+##S3method(plot, LdaRotatedCS)
+##S3method(plot, LdaPenalizedCS)
