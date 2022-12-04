@@ -5,10 +5,10 @@ Title: Data Pre-Processing and Visualization Functions for
 Version: 0.1-0
 Author: Valentin Todorov
 Maintainer: Valentin Todorov <valentin@todorov.at>
-Description: Data preprocessing techniques for classification.
+Description: Data preprocessing techniques and tools for classification.
 Depends: ggplot2
 Imports: MASS, geigen, sparseLDA, pamr
-Suggests: MBCbook
+Suggests: MBCbook, plsgenomics
 License: GPL
 Encoding: UTF-8
 LazyLoad: yes
