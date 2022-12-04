@@ -189,6 +189,14 @@ get_data <- function(dname, prep=FALSE) {
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
+        "SRBCT" = {
+            data(SRBCT, package="plsgenomics")
+            x <- SRBCT$X
+            colnames(x) <- paste0("V", 1:ncol(x))       # caret wants column names of the matrix X
+            grp <- as.factor(SRBCT$Y)
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
         "Penicillium" = {
             data(penicilliumYES, package="sparseLDA")
             X <- penicilliumYES$X

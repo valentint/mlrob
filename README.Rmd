@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# ```mlrob```: Data preprocessing techniques and tools for classification
+
+
+## Installation
+
+The ``mlrob`` package is not yet on CRAN (The Comprehensive R Archive Network) 
+
+##    install.packages("mlrob")
+
+## Building from source
+
+To install the latest stable development version from GitHub, you can pull this repository and install it using
+
+    ## install.packages("remotes")
+    remotes::install_github("valentint/mlrob")
+
+Of course, if you have already installed `remotes`, you can skip the
+first line (I have commented it out).
+
+## Example
+
+This is a basic example which shows you if the package is properly installed:
+
+```{r example}
+
+library(mlrob)
+dd <- get_data("Iris")
+(out <- LdaFisher(dd$x, dd$grp))
+plot(out)
