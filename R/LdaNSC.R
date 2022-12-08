@@ -6,7 +6,13 @@ if(FALSE) {
 
     (ll <- LdaNSC(x, grp))
     (pred <- predict(ll))
-    1-sum(diag(pp$ct))/sum(pp$ct)
+    1-sum(diag(pred$ct))/sum(pred$ct)
+
+    (ll <- LdaNSC(x, grp, threshold=1))
+    (pred <- predict(ll))
+    1-sum(diag(pred$ct))/sum(pred$ct)
+
+
 
     (tt <- table(grp, predict(ll, newdata=x)$grp))             # resubstitution
     (resub <- round(100*rrcov:::.AER(tt), 1))
@@ -86,6 +92,7 @@ LdaNSC <- function(x, grouping, prior=proportions, threshold=NULL, n.threshold=3
     ## prediction:
     errmin <- which.min(pp$errors)
     threshold <- pp$threshold[errmin]
+    numVars <- pp$nonzero[errmin]
     grppred <- pamr.predict(pp, mydata$x, threshold=threshold)
 
     ## misclassification rate:
@@ -96,7 +103,7 @@ LdaNSC <- function(x, grouping, prior=proportions, threshold=NULL, n.threshold=3
     res <- list(call=xcall, prior=prior, counts=counts,
                 meanj=meanj, cv=cv, meanov=meanov,
                 mc=mc, mcrate=rate, grppred=grppred,
-                fit=pp, threshold=threshold,
+                fit=pp, threshold=threshold, numVars=numVars,
                 method="Nearest Shrunken Centroids",
                 X=x, grp=g)
     class(res) <- "LdaNSC"

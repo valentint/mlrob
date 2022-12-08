@@ -59,7 +59,7 @@ get_data <- function(dname, prep=FALSE) {
         "NIR" = {
             data(NIR, package="MBCbook")
             x <- NIR[, -1]
-            grp <- NIR$cls
+            grp <- factor(NIR$cls)
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\nNIR: n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },

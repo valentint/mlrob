@@ -118,6 +118,11 @@ library(pracma)
     x <- NIR[, -1]
     obj <- LdaPca(x, grp, k=2)
     holdout(obj)
+
+    xx <- get_data("MLL")
+    obj <- LdaPca(xx$x, xx$grp, k=2)
+    cv(obj)
+
 }
 
 cv <- function(obj, k=10){
