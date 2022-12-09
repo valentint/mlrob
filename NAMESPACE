@@ -6,6 +6,7 @@ importFrom(MASS, lda)
 importFrom(geigen, geigen)
 importFrom(sparseLDA, sda, normalize, normalizetest, predict.sda)
 importFrom(pamr, pamr.train, pamr.predict)
+importFrom(rda, rda, rda.cv, predict.rda)
 
 
 S3method(predict, LdaSparse)
@@ -14,6 +15,7 @@ S3method(predict, LdaFisher)
 S3method(predict, LdaRotatedCS)
 S3method(predict, LdaPenalizedCS)
 S3method(predict, LdaNSC)
+S3method(predict, LdaRegularized)
 
 ##S3method(plot, LdaSparse)
 S3method(plot, LdaPca)
@@ -21,6 +23,7 @@ S3method(plot, LdaFisher)
 ##S3method(plot, LdaRotatedCS)
 ##S3method(plot, LdaPenalizedCS)
 
+S3method(print, LdaRegularized)
 S3method(print, LdaNSC)
 S3method(print, LdaSparse)
 S3method(print, LdaPca)

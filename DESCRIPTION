@@ -7,7 +7,7 @@ Author: Valentin Todorov
 Maintainer: Valentin Todorov <valentin@todorov.at>
 Description: Data preprocessing techniques and tools for classification.
 Depends: ggplot2
-Imports: MASS, geigen, sparseLDA, pamr
+Imports: MASS, geigen, sparseLDA, pamr, rda
 Suggests: MBCbook, plsgenomics
 License: GPL
 Encoding: UTF-8
