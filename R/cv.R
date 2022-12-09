@@ -197,6 +197,8 @@ cv <- function(obj, k=10){
                     LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
                 } else if(is(obj, "LdaNSC")){
                     LdaNSC(dtrain, gtrain, threshold=obj$threshold)
+                } else if(is(obj, "LdaRegularized")){
+                    LdaRegularized(dtrain, gtrain, alpha=obj$alpha, delta=obj$delta, regularization=obj$regularization)
                 } else {
                     stop("ERROR: unknown class")
                 }
@@ -207,7 +209,8 @@ cv <- function(obj, k=10){
                     is(obj, "LdaRotatedCS") ||
                     is(obj, "LdaPenalizedCS") ||
                     is(obj, "LdaSparse") ||
-                    is(obj, "LdaNSC")) resjpred$grp else resjpred@classification
+                    is(obj, "LdaNSC") ||
+                    is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
 
         acc[kk] <- accur(gtest, gpred)
 
@@ -319,6 +322,8 @@ for (iii in 1:nsim) {
                 LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
             } else if(is(obj, "LdaNSC")){
                 LdaNSC(dtrain, gtrain, threshold=obj$threshold)
+            } else if(is(obj, "LdaRegularized")){
+                LdaRegularized(dtrain, gtrain, alpha=obj$alpha, delta=obj$delta, regularization=obj$regularization)
             } else {
                 stop("ERROR: unknown class")
             }
@@ -329,7 +334,8 @@ for (iii in 1:nsim) {
                 is(obj, "LdaRotatedCS") ||
                 is(obj, "LdaPenalizedCS") ||
                 is(obj, "LdaSparse") ||
-                is(obj, "LdaNSC")) resjpred$grp else resjpred@classification
+                is(obj, "LdaNSC") ||
+                is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
     acctest[iii] <- accur(gtest, gpred)
 
     resjpred <- predict(resj, dtrain)
@@ -338,7 +344,8 @@ for (iii in 1:nsim) {
                 is(obj, "LdaRotatedCS") ||
                 is(obj, "LdaPenalizedCS") ||
                 is(obj, "LdaSparse") ||
-                is(obj, "LdaNSC")) resjpred$grp else resjpred@classification
+                is(obj, "LdaNSC") ||
+                is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
     acctrain[iii] <- accur(gtrain, gpred)
 }
 
@@ -385,15 +392,19 @@ loocv <- function(obj, X, grouping){
                 LdaSparse(X[-i,], grouping=grp[-i], lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
             } else if(is(obj, "LdaNSC")){
                 LdaNSC(X[-i,], grouping=grp[-i], threshold=obj$threshold)
+            } else if(is(obj, "LdaRegularized")){
+                LdaRegularized(X[-i,], grouping=grp[-i], alpha=obj$alpha, delta=obj$delta, regularization=obj$regularization)
             } else if(is(obj, "lda")){
                 lda(X[-i,], grouping=grp[-i])
             } else {
                 stop("ERROR: unknown class")
             }
 
-        pp <- predict(ll, newdata=t(X[i,]))
+        pp <- predict(ll, newdata=X[i,,drop=FALSE])
 
         grpnew[i] <- if(is(obj, "lda")) pp$class[1] else pp$grp[1]
+
+        ##  cat("i=",i,"grp=",grp[i], "grpnew=", grpnew[i], "\n")
     }
 
     tab <- table(grp, grpnew)
