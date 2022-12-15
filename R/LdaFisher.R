@@ -223,6 +223,7 @@ plot.LdaFisher <- function(obj) {
     gg <- ggplot(proj, aes(firstscores, secondscores, colour = grp, shape = grppred))
     gg <- gg + geom_point()
     gg <- gg + xlab("First Fisher scores") + ylab("Second Fisher scores")
+    gg <- gg + labs(shape="Predicted", color = "Original")
     print(gg)
 }
 

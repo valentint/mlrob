@@ -18,7 +18,7 @@ if(FALSE) {
 
 }
 
-get_data <- function(dname, prep=FALSE) {
+get_data <- function(dname) {
 
     switch(EXPR = dname,
         "Iris" = {
@@ -133,11 +133,11 @@ get_data <- function(dname, prep=FALSE) {
             data(Colon, package="plsgenomics")
             x <- Colon$X
             grp <- as.factor(Colon$Y)
-            if(prep) {
-                x <- log(x)
-                xmed <- apply(x, 2, median)
-                x <- sweep(x, 2, xmed)
-            }
+##            if(prep) {
+##                x <- log(x)
+##                xmed <- apply(x, 2, median)
+##                x <- sweep(x, 2, xmed)
+##            }
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },

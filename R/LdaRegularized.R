@@ -12,14 +12,14 @@ if(FALSE) {
     (pred <- predict(ll))
     1-sum(diag(pred$ct))/sum(pred$ct)
 
-    (tt <- table(grp, predict(ll, newdata=x)$grp))              # resubstitution
+    (tt <- table(grp, predict(ll, newdata=x)$grp))             # resubstitution
     (resub <- round(100*rrcov:::.AER(tt), 1))
     (ho <- holdout(ll))                                        # Hold out validation
     (cverr <- round(100*(1-cv(ll)$aveacc), 1))                 # Cross-validation
     (looerr <- round(100*loocv(ll)$eaer, 1))                   # Leave one out cross validation
 
     ##============================================================
-    xx <- get_data("Leukemia_big")
+    xx <- get_data("Colon")
     x <- xx$x
     y <- as.numeric(xx$grp)                 # rda() wants the grouping variable as sequential integers
 
@@ -28,7 +28,7 @@ if(FALSE) {
     fit <- rda(t(x), y)
     fit.cv <- rda.cv(fit, x=t(x), y=y)
 
-    alpha <- 0.22
+    alpha <- 0.11
     delta <- 1
         res <- rda(t(x), y, alpha=alpha, delta=delta)
         pred <- predict(res, t(x), y, t(x))
@@ -39,7 +39,7 @@ if(FALSE) {
     1-sum(diag(pred$ct))/sum(pred$ct)
 
 
-    (tt <- table(y, predict(ll, newdata=x)$grp))              # resubstitution
+    (tt <- table(y, predict(ll, newdata=x)$grp))               # resubstitution
     (resub <- round(100*rrcov:::.AER(tt), 1))
     (ho <- holdout(ll))                                        # Hold out validation
     (cverr <- round(100*(1-cv(ll)$aveacc), 1))                 # Cross-validation
