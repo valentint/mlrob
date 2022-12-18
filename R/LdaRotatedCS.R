@@ -1,7 +1,30 @@
-#' @importFrom e1071 matchClasses
-require(e1071)
-
 if(FALSE) {
+
+## ALL data
+    library(mlrob)
+    library(pracma)
+    xx <- get_data("ALL_train")
+    yy <- get_data("ALL_test")
+
+    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="center")
+
+    (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp)); rrcov:::.AER(tab)  # resubstitution
+    (tab <- table(yy$grp, predict(ldar, newdata=yy$x)$grp)); rrcov:::.AER(tab)  # test sample
+
+    1-cv(ldar, k=5)$aveacc
+    loocv(ldar)$eaer
+    holdout(ldar)
+
+    library(mlrob)
+    library(pracma)
+    xx <- get_data("ALL")
+
+    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="center")
+
+    ##  1-cv(ldar, k=5)$aveacc
+    loocv(ldar)$eaer
+    ##  holdout(ldar)
+
 
 ## iris data
     grp <- iris$Species

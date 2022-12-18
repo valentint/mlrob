@@ -267,6 +267,7 @@ predict.LdaPenalizedCS <- function(object, newdata){
     ## prediction:
     grp <- apply(fs, 1, which.min)
     grpnam <- levels(object$grp)[grp]
+    grp <- factor(grp, levels=levels(object$grp))
 
     ret <- list(grpnam=grpnam, grp=grp)
     if(ct) {

@@ -205,6 +205,28 @@ get_data <- function(dname) {
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
+        "ALL_train" = {
+            data(Yeoh2002)
+            x <- as.matrix(ALL_train[, -ncol(ALL_train)])
+            grp <- ALL_train$Class
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "ALL_test" = {
+            data(Yeoh2002)
+            x <- as.matrix(ALL_test[, -ncol(ALL_test)])
+            grp <- ALL_test$Class
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "ALL" = {
+            data(Yeoh2002)
+            xx <- rbind(ALL_train, ALL_test)
+            x <- as.matrix(xx[, -ncol(xx)])
+            grp <- xx$Class
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
         {
             cat("\nData set ", dname, "not found! \n")
             ret <- NULL
