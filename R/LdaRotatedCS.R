@@ -6,7 +6,7 @@ if(FALSE) {
     xx <- get_data("ALL_train")
     yy <- get_data("ALL_test")
 
-    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="center")
+    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="center", k=5)
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp)); rrcov:::.AER(tab)  # resubstitution
     (tab <- table(yy$grp, predict(ldar, newdata=yy$x)$grp)); rrcov:::.AER(tab)  # test sample

@@ -56,7 +56,7 @@ LdaPca <- function(x, grp, k=ncol(x), preprocess=c("none", "center", "sphere", "
     pred <- predict(lda)
     grppred <- pred$class
 
-    ## misclassification rate and discriminand scores
+    ## misclassification rate and discriminant scores
     mc <- table(grp, grppred)
     rate <- 1 - sum(diag(mc)) / sum(mc)
     fdiscr <- pred$x               # discriminant scores

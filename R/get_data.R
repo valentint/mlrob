@@ -18,7 +18,13 @@ if(FALSE) {
 
 }
 
-get_data <- function(dname) {
+get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
+    "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa",
+    "MLL", "Gastro", "NIR", "Colon", "Colon_bioconductor", "Golub_bioconductor",
+    "Leukemia_big", "Leukemia_small", "Prostate", "SRBCT", "Penicillium",
+    "ALL", "ALL_train", "ALL_test")) {
+
+    dname <- match.arg(dname)
 
     switch(EXPR = dname,
         "Iris" = {
