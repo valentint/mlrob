@@ -273,7 +273,6 @@ holdout <- function(obj, nsim=10, seed, test_size=0.33)
 
     acctrain <- acctest <- rep(NA, nsim)    # accuracies
 
-tic()
 for (iii in 1:nsim) {
 
     ## Split the data into train and test
@@ -349,7 +348,6 @@ for (iii in 1:nsim) {
     acctrain[iii] <- accur(gtrain, gpred)
 }
 
-    xtime <- toc()
     list(acctrain=mean(acctrain), acctest=mean(acctest),
         eaertrain=round(100*(1-mean(acctrain)), 1), eaertest=round(100*(1-mean(acctest)), 1))
 }
