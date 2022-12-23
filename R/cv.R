@@ -152,6 +152,7 @@ cv <- function(obj, k=10){
     glev <- names(table(grp))
     g <- length(glev)
     nj <- as.numeric(table(grp))
+    k <- min(min(table(grp)), k)           # number of folds not less than number of obs in a class
 
     acc <- rep(NA, k)    # accuracies
     accrob <- rep(NA, k) # accuracies robust

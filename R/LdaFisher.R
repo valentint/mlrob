@@ -137,11 +137,14 @@ LdaFisher <- function(x, grouping, prior=proportions){
     l <- min(ng-1, p) # use this number of components
 
     ## Solve the generalized eigenvalue problem using geigen
-    V <- geigen(B, W)$vectors
+    ##  take the last l vectors (the first p-l eigenvalues are < 1e-6)
+    gg <- geigen(B, W)
+##    V <- gg$vectors
+    V <- gg$vectors[,-(1:(ncol(gg$vectors)-l)), drop=FALSE]
     V <- t(t(V)/(sqrt(diag(t(V) %*% W %*% V))))
 
     if(FALSE) {
-        ## Solve the generalized eigenvalue problem using geigen
+        ## Solve the generalized eigenvalue problem
         V <- matrix(Re(eigen(solve(W) %*% B)$vec)[, 1:l], ncol=l)
         V <- t(t(V)/(sqrt(diag(t(V) %*% W %*% V))))
     }
@@ -184,7 +187,7 @@ LdaFisher <- function(x, grouping, prior=proportions){
     ##  mc <- mc[, matchClasses(mc, method = "exact", verbose=FALSE)]
     rate <- 1 - sum(diag(mc)) / sum(mc)
 
-    fdiscr <- scale(x, meanov, FALSE) %*% V[, 1:2]               # discriminant scores
+    fdiscr <- scale(x, meanov, FALSE) %*% V[, 1:min(l, 2), drop=FALSE]               # discriminant scores
 
     res <- list(call=xcall, prior=prior, counts=counts,
                 meanj=meanj, cv=cv, meanov=meanov,
@@ -192,7 +195,7 @@ LdaFisher <- function(x, grouping, prior=proportions){
                 scores=fs, fdiscr=fdiscr,
                 mc=mc, mcrate=rate, grppred=grppred,
                 method="Fisher Linear Discriminant Analysis",
-                X=x, grp=g)
+                X=x, grp=g, k=l)
     class(res) <- "LdaFisher"
     res
 }

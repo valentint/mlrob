@@ -164,11 +164,10 @@ predict.LdaRegularized <- function(object, newdata){
     grp <- predict(object$fit, t(object$X), as.numeric(object$grp), t(x))
     grpnam <- levels(object$grp)[grp]
     grp <- factor(grpnam, levels=levels(object$grp))
-
-    ret <- list(grpnam=grpnam, grp=grp)
-
-    if(ct)
+    ret <- list(grp=grp)
+    if(ct) {
         ret$ct <- rrcov::mtxconfusion(object$grp, ret$grp)
-
+        ret$AER <- 1 - sum(ret$ct[row(ret$ct) == col(ret$ct)])/sum(ret$ct)
+    }
     ret
 }

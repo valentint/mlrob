@@ -17,12 +17,13 @@ if(FALSE) {
 
     library(mlrob)
     library(pracma)
-    xx <- get_data("ALL")
+    xx <- get_data("Gastro")
 
-    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="center")
+    ldar <- LdaRotatedCS(xx$x, xx$grp, preprocess="standardize")
 
-    ##  1-cv(ldar, k=5)$aveacc
-    loocv(ldar)$eaer
+    (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp)); round(100*(1-sum(diag(tab))/sum(tab)), 1)
+    round(100*(1-cv(ldar, k=5)$aveacc), 1)
+    round(100*loocv(ldar)$eaer, 1)
     ##  holdout(ldar)
 
 
@@ -30,11 +31,11 @@ if(FALSE) {
     grp <- iris$Species
     x <- iris[, 1:4]
 
-    ldar <- LdaRotatedCS(x, grp)
+    ldar <- LdaRotatedCS(x, grp, preprocess="standardize")
 
     (tab <- table(grp, predict(ldar, newdata=x)$grp)); rrcov:::.AER(tab)
     1-cv(ldar)$aveacc
-    loo(ldar)$eaer
+    loocv(ldar)$eaer
     holdout(ldar)
 
 ## diabetes data
@@ -129,6 +130,8 @@ LdaRotatedCS <- function(x, grouping, prior=proportions, k=ncol(x), preprocess=c
 
     gx <- as.numeric(g)     # this will be used throughout the procedure
 
+## The parameter 'preprocess' will be ignored, always sphere the data
+if(FALSE) {
     z <- if(preprocess == "center") scale(x, center=TRUE, scale=FALSE)
          else if(preprocess == "sphere") scale(x, center=TRUE, scale=apply(x, 2, function(x) sd(x) / sqrt(1/(n-1))))
          else if(preprocess == "standardize") scale(x, center=TRUE, scale=TRUE)
@@ -140,9 +143,50 @@ LdaRotatedCS <- function(x, grouping, prior=proportions, k=ncol(x), preprocess=c
 
     z <- as.data.frame(z)       # to delete the attributes
     z <- as.matrix(z)
+}
+
+if(FALSE){
+    x1 <- scale(x, center=TRUE, scale=FALSE)
+    vx <- apply(x, 2, function(x) sd(x) / sqrt(1/(n-1)))
+    id <- which(vx > 0)
+    z <- scale(x1[, id], center=FALSE, scale=vx[id])
+
+    scaled_center <- if(!is.null(attr(x1, "scaled:center"))) attr(x1, "scaled:center") else rep(0, p)
+    scaled_scale <- vx
+
+    z <- as.data.frame(z)           # to delete the attributes
+    p <- ncol(z)
+}
+
+    z <- if(preprocess == "center") scale(x, center=TRUE, scale=FALSE)
+         else if(preprocess == "sphere") {
+            x1 <- scale(x, center=TRUE, scale=FALSE)
+            vx <- apply(x, 2, function(x) sd(x) / sqrt(1/(n-1)))
+            id <- which(vx > 0)
+            z1 <- scale(x1[, id], center=FALSE, scale=vx[id])
+            attr(z1, "scaled:center") <- attr(x1, "scaled:center")
+            attr(z1, "scaled:scale") <- vx
+            z1
+         } else if(preprocess == "standardize") {
+            x1 <- scale(x, center=TRUE, scale=FALSE)
+            vx <- apply(x, 2, sd)
+            id <- which(vx > 0)
+            z1 <- scale(x1[, id], center=FALSE, scale=vx[id])
+            attr(z1, "scaled:center") <- attr(x1, "scaled:center")
+            attr(z1, "scaled:scale") <- vx
+            z1
+         } else
+            stop("Wrong preprocessing selected!")
+
+    scaled_center <- if(!is.null(attr(z, "scaled:center"))) attr(z, "scaled:center") else rep(0, p)
+    scaled_scale <- if(!is.null(attr(z, "scaled:scale"))) attr(z, "scaled:scale") else rep(1, p)
+
+    z <- as.data.frame(z)       # to delete the attributes
+    z <- as.matrix(z)
+    p <- ncol(z)
 
     r <- if(n > p) p else n - 1     # rank of X
-    rr <- robustbase::rankMM(x)
+    rr <- robustbase::rankMM(z)
     r <- min(r, rr)
     r <- min(r, k)                  # number of initial components
 
@@ -267,11 +311,15 @@ predict.LdaRotatedCS <- function(object, newdata){
     x <- as.matrix(newdata)
     n <- nrow(x)
     p <- ncol(x)
-    z <- scale(x, center=object$scaled_center, scale=object$scaled_scale)
 
-##print(head(z))
+    ## z <- scale(x, center=object$scaled_center, scale=object$scaled_scale)
+    ## print(head(z))
 
-    if(length(object$meanj) > 0 & ncol(x) != nrow(object$meanj) | ncol(x) != nrow(object$loadings))
+    ## Normalize and predict
+    id <- which(object$scaled_scale > 0)
+    z <- scale(x[, id, drop=FALSE], center=object$scaled_center[id], scale=object$scaled_scale[id])
+
+    if(length(object$meanj) > 0 & ncol(z) != nrow(object$meanj) | ncol(z) != nrow(object$loadings))
         stop("wrong number of variables")
 
     ng <- ncol(object$meanj) # number of groups
@@ -297,8 +345,8 @@ predict.LdaRotatedCS <- function(object, newdata){
     ## prediction:
     grp <- apply(fs, 1, which.min)
     grpnam <- levels(object$grp)[grp]
-
-    ret <- list(grpnam=grpnam, grp=grp)
+    grp <- factor(grpnam, levels=levels(object$grp))
+    ret <- list(grp=grp)
     if(ct) {
         ret$ct <- rrcov:::mtxconfusion(object$grp, grp)
         ret$AER <- 1 - sum(ret$ct[row(ret$ct) == col(ret$ct)])/sum(ret$ct)

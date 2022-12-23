@@ -19,7 +19,8 @@ if(FALSE) {
 }
 
 get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
-    "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa",
+    "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa", "Glass", "LetterRecognition",
+    "Thyroid",
     "MLL", "Gastro", "NIR", "Colon", "Colon_bioconductor", "Golub_bioconductor",
     "Leukemia_big", "Leukemia_small", "Prostate", "SRBCT", "Penicillium",
     "ALL", "ALL_train", "ALL_test")) {
@@ -131,6 +132,27 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             data(bupa)
             x <- bupa[, -ncol(bupa)]
             grp <- bupa[, ncol(bupa)]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Glass" = {
+            data(Glass, package="mlbench")
+            x <- Glass[, -ncol(Glass)]
+            grp <- Glass[, ncol(Glass)]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "LetterRecognition" = {
+            data(LetterRecognition, package="mlbench")
+            x <- LetterRecognition[, -1]
+            grp <- LetterRecognition[, 1]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Thyroid" = {
+            data(thyroid, package="mclust")
+            x <- thyroid[, -1]
+            grp <- thyroid[, 1]
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
