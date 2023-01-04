@@ -382,7 +382,7 @@ loocv <- function(obj, X, grouping){
         ll <- if(is(obj, "LdaFisher")) {
                 LdaFisher(X[-i,], grouping=grp[-i])
             } else if(is(obj, "LdaPca")){
-                LdaPca(X[-i,], grp=grp[-i], k=obj$k, preprocess=obj$preprocess)
+                LdaPca(X[-i,], grp[-i], k=obj$k, preprocess=obj$preprocess)
             } else if(is(obj, "LdaRotatedCS")){
                 LdaRotatedCS(X[-i,], grouping=grp[-i], k=obj$k, preprocess=obj$preprocess)
             } else if(is(obj, "LdaPenalizedCS")){

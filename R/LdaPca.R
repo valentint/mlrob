@@ -1,33 +1,83 @@
 if(FALSE) {
 
     library(mlrob)
-    xx <- get_data("Colon")
-    ldap <- LdaPca(xx$x, xx$grp, k=61)
-    predict(ldap)
-    plot(ldap)
+
+    xx <- get_data("NIR")
+    ldar <- LdaPca(xx$x, xx$grp)
+
+    (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
+    round(100*(1-sum(diag(tab))/sum(tab)),1)
+    round(100*(1-cv(ldar)$aveacc),1)
+    round(100*loocv(ldar)$eaer,1)
+    holdout(ldar)
 
 }
 
-LdaPca <- function(x, grp, k=ncol(x), preprocess=c("none", "center", "sphere", "standardize")){
+LdaPca <- function(x, grouping, k=ncol(x), prior=proportions,
+    preprocess=c("none", "center", "sphere", "standardize"), trace=FALSE){
 
     preprocess <- match.arg(preprocess)
 
-    ## some checks
-    clInfo <- class(x)[1]
-    if(clInfo == "data.frame") x <- as.matrix(x)
+    if(is.null(dim(x)))
+        stop("x is not a matrix")
 
-    if(length(grp) != dim(x)[1]){
-    stop(paste("grp must be of length", dim(x)[1]))
-    }
-    if(dim(x)[2] < 1){
-    stop("matrix or data.frame expected.")
-    }
+    xcall <- match.call()
+    x <- as.matrix(x)
     n <- nrow(x)
     p <- ncol(x)
 
-    grp <- as.factor(grp)
-    glev <- levels(grp)
-    ng <- length(glev)
+    if(length(grouping) == 1) {
+        # this is the number of groups and the groups are of equal size
+        ng = grouping
+        ni = n/ng
+        if(ng*ni < n)
+            stop("nrow(x) is not divisible by the number of groups")
+        grouping <- rep(0,0)
+        for(i in 1:ng)
+            grouping <- c(grouping, rep(i,ni))
+    } else if(length(grouping) > 1 && length(grouping) < n) {
+        # grouping contains a vector with the group sizes
+        ng <- length(grouping)
+        if(sum(grouping) != n)
+            stop("nrow(x) is not equal to n1+n2+...+nn")
+
+        gx <- rep(0,0)
+        for(i in 1:ng)
+            gx <- c(gx, rep(i,grouping[i]))
+        grouping <- gx
+    }
+
+    if(n != length(grouping))
+        stop("nrow(x) and length(grouping) are different")
+
+    g <- as.factor(grouping)
+    lev <- lev1 <- levels(g)
+    counts <- as.vector(table(g))
+
+    if(!missing(prior)) {
+        if(any(prior < 0) || round(sum(prior), 5) != 1)
+            stop("invalid prior")
+        if(length(prior) != nlevels(g))
+            stop("prior is of incorrect length")
+        prior <- prior[counts > 0]
+    }
+    if(any(counts == 0)) {
+        warning(paste("group(s)", paste(lev[counts == 0], collapse=" "),"are empty"))
+        lev1 <- lev[counts > 0]
+        g <- factor(g, levels=lev1)
+        counts <- as.vector(table(g))
+    }
+    proportions <- counts/n
+    ng <- length(proportions)
+    names(g) <- NULL
+    names(prior) <- levels(g)
+
+    if(trace) {
+        cat("\nRank of X: ", r, robustbase::rankMM(x), "\n")
+        cat("\nNumber of groups: ", ng, "\n")
+    }
+
+    gx <- as.numeric(g)     # this will be used throughout the procedure
 
 
     z <- if(preprocess == "none") x
@@ -47,24 +97,37 @@ LdaPca <- function(x, grp, k=ncol(x), preprocess=c("none", "center", "sphere", "
     r <- min(r, rr)
     r <- min(r, k)                  # number of initial components
 
-##    pca <- PcaClassic(z, k=r)
-##    lda <- LdaClassic(getScores(pca), grp)
-
     pca <- prcomp(z, rank.=r)
-    lda <- lda(pca$x, grp)
+
+    ##  Check for constant PCA scores
+    vv <- rep(0, r)
+    for(j in 1:ng){
+        vvx <- apply(pca$x[g == lev1[j], ], 2, var)
+        vv <- vv + vvx * proportions[j]
+    }
+    if(length(id <- which(vv <= 1e-6)) > 0) {
+        if((r1 <- min(id)) > 1) {
+            cat("\nOld rank: ", r)
+            r <- min(r, r1-1)
+            cat(" New rank: ", r, "\n")
+            pca <- prcomp(z, rank.=r)
+        }
+    }
+
+    lda <- lda(pca$x, g)
 
     pred <- predict(lda)
     grppred <- pred$class
 
     ## misclassification rate and discriminant scores
-    mc <- table(grp, grppred)
+    mc <- table(g, grppred)
     rate <- 1 - sum(diag(mc)) / sum(mc)
     fdiscr <- pred$x               # discriminant scores
 
     res <- list(pcaobj=pca, ldaobj=lda,
                 fdiscr=fdiscr,
                 mc=mc, mcrate=rate, grppred=grppred,
-                X=x, grp=grp, k=r,
+                X=x, grp=g, k=r,
                 preprocess=preprocess, scaled_center=scaled_center, scaled_scale=scaled_scale)
 
     class(res) <- "LdaPca"

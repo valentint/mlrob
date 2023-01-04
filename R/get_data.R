@@ -19,8 +19,9 @@ if(FALSE) {
 }
 
 get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
-    "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa", "Glass", "LetterRecognition",
-    "Thyroid",
+    "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa", "Glass",
+    "Pima", "Pima_train", "Pima_test",
+    "LetterRecognition", "Thyroid",
     "MLL", "Gastro", "NIR", "Colon", "Colon_bioconductor", "Golub_bioconductor",
     "Leukemia_big", "Leukemia_small", "Prostate", "SRBCT", "Penicillium",
     "ALL", "ALL_train", "ALL_test")) {
@@ -139,6 +140,30 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             data(Glass, package="mlbench")
             x <- Glass[, -ncol(Glass)]
             grp <- Glass[, ncol(Glass)]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Pima" = {
+            data(Pima.tr, package="MASS")
+            data(Pima.te, package="MASS")
+            xx <- rbind(Pima.tr, Pima.te)
+            x <- xx[, -ncol(xx)]
+            grp <- xx[, ncol(xx)]
+            rm(xx)
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Pima_train" = {
+            data(Pima.tr, package="MASS")
+            x <- Pima.tr[, -ncol(Pima.tr)]
+            grp <- Pima.tr[, ncol(Pima.tr)]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Pima_test" = {
+            data(Pima.te, package="MASS")
+            x <- Pima.te[, -ncol(Pima.te)]
+            grp <- Pima.te[, ncol(Pima.te)]
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },

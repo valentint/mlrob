@@ -134,18 +134,21 @@ LdaFisher <- function(x, grouping, prior=proportions){
         W <- W + prior[j] * cv[[j]]
     }
 
-    l <- min(ng-1, p) # use this number of components
+    rg <- min(ng-1, p) # use this number of components
 
     ## Solve the generalized eigenvalue problem using geigen
-    ##  take the last l vectors (the first p-l eigenvalues are < 1e-6)
-    gg <- geigen(B, W)
-##    V <- gg$vectors
-    V <- gg$vectors[,-(1:(ncol(gg$vectors)-l)), drop=FALSE]
+    ##  Sort the eigenvalues in decreasing order and rearrange the eigenvectors accordingly
+    ##  Take the first l vectors (the first l eigenvalues are < 1e-6)
+    ge <- geigen(B, W)
+    ord <- order(ge$values, decreasing=TRUE)
+    V <- ge$vectors[, ord]
+##    V <- ge$vectors
+    V <- V[, 1:rg, drop=FALSE]
     V <- t(t(V)/(sqrt(diag(t(V) %*% W %*% V))))
 
     if(FALSE) {
         ## Solve the generalized eigenvalue problem
-        V <- matrix(Re(eigen(solve(W) %*% B)$vec)[, 1:l], ncol=l)
+        V <- matrix(Re(eigen(solve(W) %*% B)$vec)[, 1:rg], ncol=rg)
         V <- t(t(V)/(sqrt(diag(t(V) %*% W %*% V))))
     }
 
@@ -164,9 +167,9 @@ LdaFisher <- function(x, grouping, prior=proportions){
         Bm12 <- B.svd$u[, 1:l1] %*% diag(1/sqrt(B.svd$d[1:l1])) %*% t(B.svd$u[, 1:l1])
         K <- eigen(B12 %*% solve(W) %*% t(B12))
         l2 <- min(ng - 1, p)
-        l <- min(length(K$val > 1e-6),l2)
+        rg <- min(length(K$val > 1e-6),l2)
 
-        Vs <- Bm12 %*% K$vec[,1:l]
+        Vs <- Bm12 %*% K$vec[,1:rg]
         V <- t(t(Vs) / (sqrt(diag(t(Vs) %*% W %*% Vs))))
     }
 
@@ -187,7 +190,7 @@ LdaFisher <- function(x, grouping, prior=proportions){
     ##  mc <- mc[, matchClasses(mc, method = "exact", verbose=FALSE)]
     rate <- 1 - sum(diag(mc)) / sum(mc)
 
-    fdiscr <- scale(x, meanov, FALSE) %*% V[, 1:min(l, 2), drop=FALSE]               # discriminant scores
+    fdiscr <- scale(x, meanov, FALSE) %*% V[, 1:min(rg, 2), drop=FALSE]               # discriminant scores
 
     res <- list(call=xcall, prior=prior, counts=counts,
                 meanj=meanj, cv=cv, meanov=meanov,
@@ -195,7 +198,7 @@ LdaFisher <- function(x, grouping, prior=proportions){
                 scores=fs, fdiscr=fdiscr,
                 mc=mc, mcrate=rate, grppred=grppred,
                 method="Fisher Linear Discriminant Analysis",
-                X=x, grp=g, k=l)
+                X=x, grp=g, k=rg)
     class(res) <- "LdaFisher"
     res
 }
@@ -244,7 +247,7 @@ predict.LdaFisher <- function(object, newdata){
 
     ng <- ncol(object$meanj) # number of groups
 
-    # Fisher scores
+    ## Fisher scores
     fs <- matrix(NA, nrow=nrow(newdata), ncol=ng)
     dimnames(fs)[[2]] <- dimnames(object$mc)[[1]]
     for (j in 1:ng){
@@ -256,6 +259,13 @@ predict.LdaFisher <- function(object, newdata){
     ## prediction:
     grp <- apply(fs, 1, which.min)
     grpnam <- colnames(fs)[grp]
+    grp <- factor(grpnam, levels=levels(object$grp))
 
-    list(grpnam=grpnam, grp=grp)
+    ret <- list(grp=grp)
+    if(ct) {
+        ret$ct <- table(object$grp, grp)
+        ret$AER <- 1 - sum(diag(ret$ct))/sum(ret$ct)
+    }
+
+    ret
 }
