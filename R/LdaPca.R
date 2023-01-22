@@ -2,7 +2,7 @@ if(FALSE) {
 
     library(mlrob)
 
-    xx <- get_data("NIR")
+    xx <- get_data("Gastro")
     ldar <- LdaPca(xx$x, xx$grp)
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
@@ -14,7 +14,7 @@ if(FALSE) {
 }
 
 LdaPca <- function(x, grouping, k=ncol(x), prior=proportions,
-    preprocess=c("none", "center", "sphere", "standardize"), trace=FALSE){
+    preprocess=c("none", "center", "sphere", "standardize"), tol=1e-7, trace=FALSE){
 
     preprocess <- match.arg(preprocess)
 
@@ -97,6 +97,8 @@ LdaPca <- function(x, grouping, k=ncol(x), prior=proportions,
     r <- min(r, rr)
     r <- min(r, k)                  # number of initial components
 
+    ##        cat("\nOld rank: ", r)
+
     pca <- prcomp(z, rank.=r)
 
     ##  Check for constant PCA scores
@@ -105,12 +107,15 @@ LdaPca <- function(x, grouping, k=ncol(x), prior=proportions,
         vvx <- apply(pca$x[g == lev1[j], ], 2, var)
         vv <- vv + vvx * proportions[j]
     }
-    if(length(id <- which(vv <= 1e-6)) > 0) {
+
+    if(length(id <- which(vv <= tol)) > 0) {
         if((r1 <- min(id)) > 1) {
-            cat("\nOld rank: ", r)
             r <- min(r, r1-1)
             cat(" New rank: ", r, "\n")
-            pca <- prcomp(z, rank.=r)
+
+            ##  pca <- prcomp(z, rank.=r)
+            pca$rotation <- pca$rotation[,1:r]
+            pca$x <- pca$x[,1:r]
         }
     }
 

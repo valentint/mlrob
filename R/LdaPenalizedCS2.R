@@ -1,22 +1,18 @@
 if(FALSE) {
-    library(pracma)
     library(mlrob)
 
-    xx <- get_data("Olitos")
-    ldar <- LdaPenalizedCS(xx$x, xx$grp, preprocess="sphere", prednorm=FALSE)
+    xx <- get_data("Colon")
+    ldar <- LdaPenalizedCS(xx$x, xx$grp, preprocess="sphere")
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
     round(100*(1-sum(diag(tab))/sum(tab)),1)
-
     round(100*(1-cv(ldar)$aveacc),1)
     round(100*loocv(ldar)$eaer,1)
     holdout(ldar)
 }
 
-##  'prednorm\ is an argument used for prediction: whether to normalize the scores
-##
-LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
-    preprocess=c("center", "sphere", "standardize"), tol=1e-6, prednorm=FALSE, trace=FALSE) {
+LdaPenalizedCS2 <- function(x, grouping, prior=proportions, k=ncol(x),
+    preprocess=c("center", "sphere", "standardize"), tol=1e-6, trace=FALSE) {
 
     preprocess <- match.arg(preprocess)
 
@@ -82,23 +78,9 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
     gx <- as.numeric(g)     # this will be used throughout the procedure
 
     z <- if(preprocess == "center") scale(x, center=TRUE, scale=FALSE)
-         else if(preprocess == "sphere") {
-            x1 <- scale(x, center=TRUE, scale=FALSE)
-            vx <- apply(x, 2, function(x) sd(x) / sqrt(1/(n-1)))
-            id <- which(vx > 0)
-            z1 <- scale(x1[, id], center=FALSE, scale=vx[id])
-            attr(z1, "scaled:center") <- attr(x1, "scaled:center")
-            attr(z1, "scaled:scale") <- vx
-            z1
-         } else if(preprocess == "standardize") {
-            x1 <- scale(x, center=TRUE, scale=FALSE)
-            vx <- apply(x, 2, sd)
-            id <- which(vx > 0)
-            z1 <- scale(x1[, id], center=FALSE, scale=vx[id])
-            attr(z1, "scaled:center") <- attr(x1, "scaled:center")
-            attr(z1, "scaled:scale") <- vx
-            z1
-         } else
+         else if(preprocess == "sphere") scale(x, center=TRUE, scale=apply(x, 2, function(x) sd(x) / sqrt(1/(n-1))))
+         else if(preprocess == "standardize") scale(x, center=TRUE, scale=TRUE)
+         else
             stop("Wrong preprocessing selected!")
 
     scaled_center <- if(!is.null(attr(z, "scaled:center"))) attr(z, "scaled:center") else rep(0, p)
@@ -106,7 +88,6 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
 
     z <- as.data.frame(z)       # to delete the attributes
     z <- as.matrix(z)
-    p <- ncol(z)
     zz <- z %*% t(z)
 
     r <- if(n > p) p else n - 1     # rank of X
@@ -138,12 +119,12 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
     loadings <- W$v[, 1:r]
     sdev <- W$d[1:r]/sqrt(max(1, n - 1))
 
-##    F1 <- z %*% loadings %*% diag(1/per)
-##    F2 <- z %*% loadings %*% diag(1/(sdev*sqrt(max(1, n - 1))))
+    F1 <- z %*% loadings %*% diag(1/per)
+    F2 <- z %*% loadings %*% diag(1/(sdev*sqrt(max(1, n - 1))))
 
-##    print(head(F))
-##    print(head(F1))
-##    print(head(F2))
+print(head(F))
+print(head(F1))
+print(head(F2))
 
     ## Initial indicator matrix G
     G <- matrix(0, nrow=n, ncol=ng)
@@ -159,8 +140,13 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
         cat("\nInitial between-grops scatter: ", sum(diag(SB)), "\n")
 
     ## Better scores F
-    V <- eigen(t(F) %*% (H + zz) %*% F)
-    Q <- V$vectors
+    ##V <- eigen(H + zz)
+    ##F <- V$vectors
+    ##d <- V$values
+
+    ## Better loadings A
+    V <- eigen(t(z) %*% (diag(n) + H) %*% z)
+    A <- V$vectors
     d <- V$values
 
     rg <- r                 # actual dimensions
@@ -171,13 +157,25 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
     if(trace)
         cat("\nNumber of actual dimensions used: ", rg, "\n")
 
-    Q <- Q[, 1:rg]
-    F <- F %*% Q
+    A <- A[, 1:rg]
+    F <- z %*% A
+    wqr <- qr(F)
+    F <- qr.Q(wqr)
+    RR <- qr.R(wqr)
+    D <- diag(RR)
+
+    ## keep these to project new data and centroids
+    loadings <- A
+    sdev <- D
+
+    ##  F1 <- z %*% loadings %*% diag(1/sdev)
+    ##  print(all.equal(F, F1, check.attributes=FALSE))
 
     F <- F[, 1:rg]              # truncated scores
     C <- W %*% F                # centroids of the scores
 
-    rotation <- Q
+    ##  C1 <- t(meanj) %*% loadings %*% diag(1/sdev)
+    ##  print(all.equal(C, C1, check.attributes=FALSE))
 
     ##  Prediction using F and C
     ## Fisher scores
@@ -210,17 +208,17 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
 
     res <- list(call=xcall, counts=counts,
                 meanj=meanj, cv=cv, meanov=meanov, nobs=n,       #    scores=fs, fdiscr=fdiscr,
-                sdev=sdev, loadings=loadings, rotation=rotation,
+                sdev=sdev, loadings=loadings,
                 SB=SB, SB_final=SBN,
                 mc=mc, mcrate=rate, grppred=grppred,
                 method="LDA on penalized component scores",
-                X=x, grp=g, k=r, rg=rg, prednorm=prednorm,
+                X=x, grp=g, k=r, rg=rg,
                 preprocess=preprocess, scaled_center=scaled_center, scaled_scale=scaled_scale)
-    class(res) <- "LdaPenalizedCS"
+    class(res) <- "LdaPenalizedCS2"
     res
 }
 
-print.LdaPenalizedCS <- function(x,...){
+print.LdaPenalizedCS2 <- function(x,...){
   cat("--------------------------------------")
   cat("\nResults from Fishers LDA on penalized components")
   cat("\n- Initial between-groups scatter...:", sum(diag(x$SB)))
@@ -231,7 +229,7 @@ print.LdaPenalizedCS <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaPenalizedCS <- function(object, newdata){
+predict.LdaPenalizedCS2 <- function(object, newdata){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample
@@ -242,30 +240,24 @@ predict.LdaPenalizedCS <- function(object, newdata){
     n <- nrow(x)
     p <- ncol(x)
 
-    ## Normalize and predict
-    id <- which(object$scaled_scale > 0)
-    z <- scale(x[, id, drop=FALSE], center=object$scaled_center[id], scale=object$scaled_scale[id])
+    ## the test data matrix
+    z <- scale(x, center=object$scaled_center, scale=object$scaled_scale)
 
-    if(length(object$meanj) > 0 & ncol(z) != nrow(object$meanj) | ncol(z) != nrow(object$loadings))
+    ## the training data matrix
+    z1 <- scale(object$X, center=object$scaled_center, scale=object$scaled_scale)
+
+    if(length(object$meanj) > 0 & ncol(x) != nrow(object$meanj))
         stop("wrong number of variables")
 
     ng <- ncol(object$meanj) # number of groups
 
-    ## Get the initial scores using 'loadings' and 'sdev'
-    if(!object$prednorm) {
-        F1 <- z %*% object$loadings %*% diag(1/(object$sdev*sqrt(max(1, object$nobs - 1))))
-        F1 <- F1 %*% object$rotation
-    } else {
-        F1 <- z %*% object$loadings
-        F1 <- F1 %*% object$rotation
-        dVV <- diag(t(F1) %*% F1)
-        F1 <- F1 %*% diag(1/sqrt(dVV))              # = ZA
-    }
+    Fx <- object$scores
+    Cx <- object$centroids
+    rg <- ncol(Fx)
 
-    # Restore and rotate the centroids
-    C1 <- t(object$meanj) %*% object$loadings %*% diag(1/(object$sdev*sqrt(max(1, object$nobs - 1))))
-    C1 <- C1 %*% object$rotation
 
+    F1 <- z %*% object$loadings %*% diag(1/object$sdev)
+    C1 <- t(object$meanj) %*% object$loadings %*% diag(1/object$sdev)
 
     ## Discriminant scores
     fs <- matrix(NA, nrow=n, ncol=ng)

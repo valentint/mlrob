@@ -193,7 +193,9 @@ cv <- function(obj, k=10){
                 } else if(is(obj, "LdaRotatedCS")){
                     LdaRotatedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
                 } else if(is(obj, "LdaPenalizedCS")){
-                    LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
+                    LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
+                } else if(is(obj, "LdaPenalizedCSV2")){
+                    LdaPenalizedCSV2(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
                 } else if(is(obj, "LdaSparse")){
                     LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
                 } else if(is(obj, "LdaNSC")){
@@ -209,6 +211,7 @@ cv <- function(obj, k=10){
                     is(obj, "LdaPca") ||
                     is(obj, "LdaRotatedCS") ||
                     is(obj, "LdaPenalizedCS") ||
+                    is(obj, "LdaPenalizedCSV2") ||
                     is(obj, "LdaSparse") ||
                     is(obj, "LdaNSC") ||
                     is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
@@ -317,7 +320,9 @@ for (iii in 1:nsim) {
             } else if(is(obj, "LdaRotatedCS")){
                 LdaRotatedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
             } else if(is(obj, "LdaPenalizedCS")){
-                LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
+                LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
+            } else if(is(obj, "LdaPenalizedCSV2")){
+                LdaPenalizedCSV2(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
             } else if(is(obj, "LdaSparse")){
                 LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
             } else if(is(obj, "LdaNSC")){
@@ -333,6 +338,7 @@ for (iii in 1:nsim) {
                 is(obj, "LdaPca") ||
                 is(obj, "LdaRotatedCS") ||
                 is(obj, "LdaPenalizedCS") ||
+                is(obj, "LdaPenalizedCSV2") ||
                 is(obj, "LdaSparse") ||
                 is(obj, "LdaNSC") ||
                 is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
@@ -343,6 +349,7 @@ for (iii in 1:nsim) {
                 is(obj, "LdaPca") ||
                 is(obj, "LdaRotatedCS") ||
                 is(obj, "LdaPenalizedCS") ||
+                is(obj, "LdaPenalizedCSV2") ||
                 is(obj, "LdaSparse") ||
                 is(obj, "LdaNSC") ||
                 is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
@@ -386,7 +393,9 @@ loocv <- function(obj, X, grouping){
             } else if(is(obj, "LdaRotatedCS")){
                 LdaRotatedCS(X[-i,], grouping=grp[-i], k=obj$k, preprocess=obj$preprocess)
             } else if(is(obj, "LdaPenalizedCS")){
-                LdaPenalizedCS(X[-i,], grouping=grp[-i], k=obj$k, preprocess=obj$preprocess)
+                LdaPenalizedCS(X[-i,], grouping=grp[-i], k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
+            } else if(is(obj, "LdaPenalizedCSV2")){
+                LdaPenalizedCSV2(X[-i,], grouping=grp[-i], k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
             } else if(is(obj, "LdaSparse")){
                 LdaSparse(X[-i,], grouping=grp[-i], lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
             } else if(is(obj, "LdaNSC")){

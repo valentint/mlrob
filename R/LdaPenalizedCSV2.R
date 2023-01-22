@@ -2,8 +2,8 @@ if(FALSE) {
     library(pracma)
     library(mlrob)
 
-    xx <- get_data("Olitos")
-    ldar <- LdaPenalizedCS(xx$x, xx$grp, preprocess="sphere", prednorm=FALSE)
+    xx <- get_data("Iris")
+    ldar <- LdaPenalizedCSV2(xx$x, xx$grp, preprocess="sphere", prednorm=TRUE)
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
     round(100*(1-sum(diag(tab))/sum(tab)),1)
@@ -15,7 +15,7 @@ if(FALSE) {
 
 ##  'prednorm\ is an argument used for prediction: whether to normalize the scores
 ##
-LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
+LdaPenalizedCSV2 <- function(x, grouping, prior=proportions, k=ncol(x),
     preprocess=c("center", "sphere", "standardize"), tol=1e-6, prednorm=FALSE, trace=FALSE) {
 
     preprocess <- match.arg(preprocess)
@@ -125,7 +125,7 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
 
     ## Initial component scores
     W <- svd(z)
-    F <- W$u
+    F0 <- F <- W$u
     per <- W$d
 
     if(trace)
@@ -159,23 +159,33 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
         cat("\nInitial between-grops scatter: ", sum(diag(SB)), "\n")
 
     ## Better scores F
-    V <- eigen(t(F) %*% (H + zz) %*% F)
-    Q <- V$vectors
+    V <- eigen(H + zz)
+    F <- V$vectors
     d <- V$values
+
+    ##V <- eigen(t(F) %*% (H + zz) %*% F)
+    ##Q <- V$vectors
+    ##d <- V$values
 
     rg <- r                 # actual dimensions
     if(n > p) {
     	rg <- sum(d > tol)
+        rg <- min(rg, r)
     }
 
     if(trace)
         cat("\nNumber of actual dimensions used: ", rg, "\n")
 
-    Q <- Q[, 1:rg]
-    F <- F %*% Q
+    F0 <- F0[, 1:rg]
+
+    ##Q <- Q[, 1:rg]
+    ##F <- F %*% Q
 
     F <- F[, 1:rg]              # truncated scores
-    C <- W %*% F                # centroids of the scores
+    Cx <- C <- W %*% F                # centroids of the scores
+
+    W <- svd(t(F) %*% F0)
+    Q <- W$v %*% t(W$u)
 
     rotation <- Q
 
@@ -209,18 +219,18 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
 ##  ==============================================================
 
     res <- list(call=xcall, counts=counts,
-                meanj=meanj, cv=cv, meanov=meanov, nobs=n,       #    scores=fs, fdiscr=fdiscr,
+                meanj=meanj, cv=cv, meanov=meanov, nobs=n, centroids=Cx,       #    scores=fs, fdiscr=fdiscr,
                 sdev=sdev, loadings=loadings, rotation=rotation,
                 SB=SB, SB_final=SBN,
                 mc=mc, mcrate=rate, grppred=grppred,
                 method="LDA on penalized component scores",
                 X=x, grp=g, k=r, rg=rg, prednorm=prednorm,
                 preprocess=preprocess, scaled_center=scaled_center, scaled_scale=scaled_scale)
-    class(res) <- "LdaPenalizedCS"
+    class(res) <- "LdaPenalizedCSV2"
     res
 }
 
-print.LdaPenalizedCS <- function(x,...){
+print.LdaPenalizedCSV2 <- function(x,...){
   cat("--------------------------------------")
   cat("\nResults from Fishers LDA on penalized components")
   cat("\n- Initial between-groups scatter...:", sum(diag(x$SB)))
@@ -231,7 +241,7 @@ print.LdaPenalizedCS <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaPenalizedCS <- function(object, newdata){
+predict.LdaPenalizedCSV2 <- function(object, newdata){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample
@@ -266,11 +276,10 @@ predict.LdaPenalizedCS <- function(object, newdata){
     C1 <- t(object$meanj) %*% object$loadings %*% diag(1/(object$sdev*sqrt(max(1, object$nobs - 1))))
     C1 <- C1 %*% object$rotation
 
-
     ## Discriminant scores
     fs <- matrix(NA, nrow=n, ncol=ng)
     for(j in 1:ng) {
-        xc <- scale(F1, C1[j,], scale=FALSE)
+        xc <- scale(F1, object$centroids[j,], scale=FALSE)
         fs[,j] <- sqrt(apply(xc^2, 1, sum))
     }
 

@@ -21,7 +21,7 @@ if(FALSE) {
 get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
     "Soil", "Salmon", "Fish", "Olitos", "Fruit", "Ionosphere", "Bupa", "Glass",
     "Pima", "Pima_train", "Pima_test",
-    "LetterRecognition", "Thyroid",
+    "LetterRecognition", "Thyroid", "Vehicle", "Ecoli", "Heart",
     "MLL", "Gastro", "NIR", "Colon", "Colon_bioconductor", "Golub_bioconductor",
     "Leukemia_big", "Leukemia_small", "Prostate", "SRBCT", "Penicillium",
     "ALL", "ALL_train", "ALL_test")) {
@@ -123,6 +123,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Ionosphere" = {
+            ##  Ionosphere Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/ionosphere
             data(ionosphere)
             x <- ionosphere[, -ncol(ionosphere)]
             grp <- ionosphere[, ncol(ionosphere)]
@@ -130,6 +132,7 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Bupa" = {
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/liver+disorders
             data(bupa)
             x <- bupa[, -ncol(bupa)]
             grp <- bupa[, ncol(bupa)]
@@ -137,6 +140,9 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Glass" = {
+            ##  Glass Identification Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/glass+identification
+            ##  mlbench
             data(Glass, package="mlbench")
             x <- Glass[, -ncol(Glass)]
             grp <- Glass[, ncol(Glass)]
@@ -175,9 +181,47 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Thyroid" = {
+            ##  Thyroid Disease Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/thyroid+disease
             data(thyroid, package="mclust")
             x <- thyroid[, -1]
             grp <- thyroid[, 1]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Vehicle" = {
+            ##  Statlog (Vehicle Silhouettes) Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/Statlog+%28Vehicle+Silhouettes%29
+            data(vehicle)
+            x <- vehicle[, -ncol(vehicle)]
+            grp <- vehicle[, ncol(vehicle)]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Ecoli" = {
+            ##  Ecoli Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/ecoli
+            data(ecoli)
+            x <- ecoli[, -ncol(ecoli)]
+            grp <- ecoli[, ncol(ecoli)]
+
+            ## remove the classes with 5 or less elements
+            id <- which(grp %in% names(which(table(grp) <= 5)))
+            grp <- grp[-id]
+            grp <- factor(grp)
+            x <- x[-id,]
+            ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
+            cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
+        },
+        "Heart" = {
+            ##  Heart Disease Data Set
+            ##  UCI:    https://archive.ics.uci.edu/ml/datasets/heart+disease
+            data(heartc)
+            ## remove the 6 missing values
+            heartc <- heartc[!is.na(heartc[,12]) & !is.na(heartc[,13]),]
+            x <- heartc[, -ncol(heartc)]
+            ## recode class to be 0/1
+            grp <- factor(ifelse(heartc[, ncol(heartc)] == 0, 0, 1))
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
