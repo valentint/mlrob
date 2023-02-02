@@ -166,6 +166,7 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
     rg <- r                 # actual dimensions
     if(n > p) {
     	rg <- sum(d > tol)
+        rg <- min(rg, r)
     }
 
     if(trace)
@@ -175,7 +176,7 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
     F <- F %*% Q
 
     F <- F[, 1:rg]              # truncated scores
-    C <- W %*% F                # centroids of the scores
+    Cx <- C <- W %*% F          # centroids of the scores
 
     rotation <- Q
 
@@ -209,7 +210,7 @@ LdaPenalizedCS <- function(x, grouping, prior=proportions, k=ncol(x),
 ##  ==============================================================
 
     res <- list(call=xcall, counts=counts,
-                meanj=meanj, cv=cv, meanov=meanov, nobs=n,       #    scores=fs, fdiscr=fdiscr,
+                meanj=meanj, cv=cv, meanov=meanov, nobs=n, centroids=Cx,      #    scores=fs, fdiscr=fdiscr,
                 sdev=sdev, loadings=loadings, rotation=rotation,
                 SB=SB, SB_final=SBN,
                 mc=mc, mcrate=rate, grppred=grppred,
@@ -262,15 +263,18 @@ predict.LdaPenalizedCS <- function(object, newdata){
         F1 <- F1 %*% diag(1/sqrt(dVV))              # = ZA
     }
 
-    # Restore and rotate the centroids
+    ## Restore and rotate the centroids.
+    ##  C1 will be identical to object$centroids, we can use one
+    ##  or the other for prediction.
+    ##
     C1 <- t(object$meanj) %*% object$loadings %*% diag(1/(object$sdev*sqrt(max(1, object$nobs - 1))))
     C1 <- C1 %*% object$rotation
-
+    ##  print(all.equal(C1, object$centroids))
 
     ## Discriminant scores
     fs <- matrix(NA, nrow=n, ncol=ng)
     for(j in 1:ng) {
-        xc <- scale(F1, C1[j,], scale=FALSE)
+        xc <- scale(F1, object$centroids[j,], scale=FALSE)
         fs[,j] <- sqrt(apply(xc^2, 1, sum))
     }
 

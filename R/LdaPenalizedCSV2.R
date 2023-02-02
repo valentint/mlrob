@@ -2,7 +2,7 @@ if(FALSE) {
     library(pracma)
     library(mlrob)
 
-    xx <- get_data("Iris")
+    xx <- get_data("Olitos")
     ldar <- LdaPenalizedCSV2(xx$x, xx$grp, preprocess="sphere", prednorm=TRUE)
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
@@ -182,7 +182,7 @@ LdaPenalizedCSV2 <- function(x, grouping, prior=proportions, k=ncol(x),
     ##F <- F %*% Q
 
     F <- F[, 1:rg]              # truncated scores
-    Cx <- C <- W %*% F                # centroids of the scores
+    Cx <- C <- W %*% F          # centroids of the scores
 
     W <- svd(t(F) %*% F0)
     Q <- W$v %*% t(W$u)
@@ -272,9 +272,13 @@ predict.LdaPenalizedCSV2 <- function(object, newdata){
         F1 <- F1 %*% diag(1/sqrt(dVV))              # = ZA
     }
 
-    # Restore and rotate the centroids
+    ## Restore and rotate the centroids.
+    ##  C1 will NOT be identical to object$centroids, we cannot use C1
+    ##  for prediction.
+    ##
     C1 <- t(object$meanj) %*% object$loadings %*% diag(1/(object$sdev*sqrt(max(1, object$nobs - 1))))
     C1 <- C1 %*% object$rotation
+    ##  print(all.equal(C1, object$centroids))
 
     ## Discriminant scores
     fs <- matrix(NA, nrow=n, ncol=ng)

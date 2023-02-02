@@ -181,7 +181,7 @@ if(FALSE){
     scaled_center <- if(!is.null(attr(z, "scaled:center"))) attr(z, "scaled:center") else rep(0, p)
     scaled_scale <- if(!is.null(attr(z, "scaled:scale"))) attr(z, "scaled:scale") else rep(1, p)
 
-    z <- as.data.frame(z)       # to delete the attributes
+    z <- as.data.frame(z)           # to delete the attributes
     z <- as.matrix(z)
     p <- ncol(z)
 
