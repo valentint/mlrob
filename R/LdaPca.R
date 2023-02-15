@@ -141,16 +141,16 @@ LdaPca <- function(x, grouping, k=ncol(x), prior=proportions,
 }
 
 print.LdaPca <- function(x,...){
-  cat("--------------------------------------")
+  cat("--------------------------------------\n")
     print(x$ldaobj)
 
   cat("--------------------------------------\n")
 }
 
-plot.LdaPca <- function(obj) {
-    proj <- data.frame(obj$pcaobj$x[,1:2])
-    proj$grp <- as.factor(obj$grp)
-    proj$grppred <- as.factor(obj$grppred)
+plot.LdaPca <- function(x, ...) {
+    proj <- data.frame(x$pcaobj$x[,1:2])
+    proj$grp <- as.factor(x$grp)
+    proj$grppred <- as.factor(x$grppred)
     firstscores <- NULL
     secondscores <- NULL
     colnames(proj) <- c("firstscores", "secondscores","grp", "grppred")
@@ -161,7 +161,7 @@ plot.LdaPca <- function(obj) {
     print(gg)
 }
 
-predict.LdaPca <- function(object, newdata){
+predict.LdaPca <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

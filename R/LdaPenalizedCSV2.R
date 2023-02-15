@@ -2,8 +2,8 @@ if(FALSE) {
     library(pracma)
     library(mlrob)
 
-    xx <- get_data("Olitos")
-    ldar <- LdaPenalizedCSV2(xx$x, xx$grp, preprocess="sphere", prednorm=TRUE)
+    xx <- get_data("ALL")
+    ldar <- LdaPenalizedCSV2(xx$x, xx$grp, preprocess="sphere", k=264, prednorm=TRUE)
 
     (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
     round(100*(1-sum(diag(tab))/sum(tab)),1)
@@ -11,6 +11,19 @@ if(FALSE) {
     round(100*(1-cv(ldar)$aveacc),1)
     round(100*loocv(ldar)$eaer,1)
     holdout(ldar)
+
+    ## This will break, if data are sphered but will work if only centered
+    ##
+    ##  Breaks in:
+    ##  svd(t(F) %*% F0)
+    ##
+    xx <- get_data("ALL")
+    xx$x <- xx$x[-163,]
+    xx$grp <- xx$grp[-163]
+    ldar <- LdaPenalizedCSV2(xx$x, xx$grp, preprocess="sphere", k=264, prednorm=FALSE)
+
+    ##  Error in La.svd(x, nu, nv) : error code 1 from Lapack routine 'dgesdd'
+
 }
 
 ##  'prednorm\ is an argument used for prediction: whether to normalize the scores
@@ -173,6 +186,8 @@ LdaPenalizedCSV2 <- function(x, grouping, prior=proportions, k=ncol(x),
         rg <- min(rg, r)
     }
 
+    cat("\n", r, rg, sum(d > tol), "\n")
+
     if(trace)
         cat("\nNumber of actual dimensions used: ", rg, "\n")
 
@@ -241,7 +256,7 @@ print.LdaPenalizedCSV2 <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaPenalizedCSV2 <- function(object, newdata){
+predict.LdaPenalizedCSV2 <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

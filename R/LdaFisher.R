@@ -1,5 +1,15 @@
 if(FALSE) {
 
+    xx <- get_data("Ecoli")
+    ldar <- LdaFisher(xx$x, xx$grp)
+
+    (tab <- table(xx$grp, predict(ldar, newdata=xx$x)$grp))
+    round(100*(1-sum(diag(tab))/sum(tab)),1)
+
+    round(100*(1-cv(ldar)$aveacc),1)
+    round(100*loocv(ldar)$eaer,1)
+    holdout(ldar)
+
     ## iris data
     grp <- iris$Species
     x <- iris[, 1:4]
@@ -215,14 +225,14 @@ print.LdaFisher <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-plot.LdaFisher <- function(obj) {
+plot.LdaFisher <- function(x, ...) {
 
     #proj <- xc %*%V [,1:2]
     ###proj <- fs[,1:2]
 
-    proj <- data.frame(obj$fdiscr)
-    proj$grp <- as.factor(obj$grp)
-    proj$grppred <- as.factor(obj$grppred)
+    proj <- data.frame(x$fdiscr)
+    proj$grp <- as.factor(x$grp)
+    proj$grppred <- as.factor(x$grppred)
     firstscores <- NULL
     secondscores <- NULL
     colnames(proj) <- c("firstscores", "secondscores","grp", "grppred")
@@ -233,7 +243,7 @@ plot.LdaFisher <- function(obj) {
     print(gg)
 }
 
-predict.LdaFisher <- function(object, newdata){
+predict.LdaFisher <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

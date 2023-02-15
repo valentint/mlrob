@@ -384,7 +384,7 @@ loocv <- function(obj, X, grouping){
 
     for(i in 1:n)
     {
-        ##  cat("i=",i,"\n")
+      ##    cat("i=",i,"\n")
 
         ll <- if(is(obj, "LdaFisher")) {
                 LdaFisher(X[-i,], grouping=grp[-i])

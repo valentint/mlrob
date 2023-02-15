@@ -112,12 +112,12 @@ LdaNSC <- function(x, grouping, prior=proportions, threshold=NULL, n.threshold=3
 
 print.LdaNSC <- function(x,...){
   cat("--------------------------------------")
-  cat("\nResults from Nearest Shrunken Centroids")
+  cat("\nResults from Nearest Shrunken Centroids:\n")
     print(x$fit)
   cat("--------------------------------------\n")
 }
 
-predict.LdaNSC <- function(object, newdata){
+predict.LdaNSC <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

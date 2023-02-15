@@ -47,7 +47,7 @@ data(ionosphere)
  ionosphere[, 1:6] |> pairs()
 }
 \references{
-Sigillito, V. G., Wing, S. P., Hutton, L. V., \& Baker, K. B. (1989).
+Sigillito, V. G., Wing, S. P., Hutton, L. V., and Baker, K. B. (1989).
      Classification of radar returns from the ionosphere using neural
      networks. Johns Hopkins APL Technical Digest, 10, 262-266.
 }

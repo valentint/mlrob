@@ -1,13 +1,20 @@
 exportPattern("^[[:alpha:]]+")
 ##  useDynLib(mlrob)
 
+##  importFrom("datasets", "iris")
+  importFrom("methods", "is", "slotNames")
+  importFrom("stats", "cov", "mad", "mahalanobis", "prcomp", "qchisq",
+             "runif", "sd", "var")
+  importFrom("utils", "data")
+
 importFrom(stats, predict)
 importFrom(MASS, lda)
 importFrom(geigen, geigen)
 importFrom(sparseLDA, sda, normalize, normalizetest, predict.sda)
 importFrom(pamr, pamr.train, pamr.predict)
 importFrom(rda, rda, rda.cv, predict.rda)
-
+importFrom(rrcov, LdaClassic, Linda, QdaClassic, QdaCov)
+importFrom(rrcovHD, SosDiscRobust)
 
 S3method(predict, LdaSparse)
 S3method(predict, LdaPca)
@@ -18,7 +25,7 @@ S3method(predict, LdaPenalizedCSV2)
 S3method(predict, LdaNSC)
 S3method(predict, LdaRegularized)
 
-##S3method(plot, LdaSparse)
+S3method(plot, LdaSparse)
 S3method(plot, LdaPca)
 S3method(plot, LdaFisher)
 ##S3method(plot, LdaRotatedCS)

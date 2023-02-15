@@ -146,7 +146,7 @@ print.LdaRegularized <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaRegularized <- function(object, newdata){
+predict.LdaRegularized <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

@@ -301,7 +301,7 @@ print.LdaRotatedCS <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaRotatedCS <- function(object, newdata){
+predict.LdaRotatedCS <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample

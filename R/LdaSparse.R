@@ -172,19 +172,19 @@ LdaSparse <- function(x, grouping, prior=proportions, lambda=1e-6, numVars, maxR
 
 print.LdaSparse <- function(x,...){
   cat("\n--------------------------------------\n")
-  cat("\nResults from Sparse LDA")
+  cat("\nResults from Sparse LDA\n")
   print(x$fit)
   cat("\n--------------------------------------\n")
 }
 
-plot.LdaSparse <- function(obj) {
+plot.LdaSparse <- function(x, ...) {
 
     #proj <- xc %*%V [,1:2]
     ###proj <- fs[,1:2]
 
-    proj <- data.frame(obj$fdiscr)
-    proj$grp <- as.factor(obj$grp)
-    proj$grppred <- as.factor(obj$grppred)
+    proj <- data.frame(x$fdiscr)
+    proj$grp <- as.factor(x$grp)
+    proj$grppred <- as.factor(x$grppred)
     firstscores <- NULL
     secondscores <- NULL
     colnames(proj) <- c("firstscores", "secondscores","grp", "grppred")

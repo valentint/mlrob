@@ -232,7 +232,7 @@ print.LdaPenalizedCS <- function(x,...){
   cat("--------------------------------------\n")
 }
 
-predict.LdaPenalizedCS <- function(object, newdata){
+predict.LdaPenalizedCS <- function(object, newdata, ...){
     ct <- FALSE
     if(missing(newdata)) {
         newdata <- object$X         # use the training sample
