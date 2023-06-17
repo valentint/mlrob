@@ -1,20 +1,24 @@
 exportPattern("^[[:alpha:]]+")
 ##  useDynLib(mlrob)
 
-##  importFrom("datasets", "iris")
   importFrom("methods", "is", "slotNames")
   importFrom("stats", "cov", "mad", "mahalanobis", "prcomp", "qchisq",
              "runif", "sd", "var")
   importFrom("utils", "data")
 
+importFrom(pracma, pinv)
 importFrom(stats, predict)
 importFrom(MASS, lda)
 importFrom(geigen, geigen)
 importFrom(sparseLDA, sda, normalize, normalizetest, predict.sda)
 importFrom(pamr, pamr.train, pamr.predict)
 importFrom(rda, rda, rda.cv, predict.rda)
-importFrom(rrcov, LdaClassic, Linda, QdaClassic, QdaCov)
+importFrom(rrcov, LdaClassic, Linda, QdaClassic, QdaCov, predict, mtxconfusion)
 importFrom(rrcovHD, SosDiscRobust)
+importFrom(robustbase, rankMM)
+importFrom(ggplot2, geom_point, ggplot, aes, labs, xlab, ylab, aes_string)
+
+importMethodsFrom(rrcov, predict)
 
 S3method(predict, LdaSparse)
 S3method(predict, LdaPca)

@@ -348,7 +348,7 @@ predict.LdaRotatedCS <- function(object, newdata, ...){
     grp <- factor(grpnam, levels=levels(object$grp))
     ret <- list(grp=grp)
     if(ct) {
-        ret$ct <- rrcov:::mtxconfusion(object$grp, grp)
+        ret$ct <- rrcov::mtxconfusion(object$grp, grp)
         ret$AER <- 1 - sum(ret$ct[row(ret$ct) == col(ret$ct)])/sum(ret$ct)
     }
 

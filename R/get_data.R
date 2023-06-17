@@ -21,7 +21,10 @@ if(FALSE) {
 ##  This function uses data sets from the package as well as data from
 ##  other packages, using the command data(). This will not be liked
 ##  by "R CMD check" and errors "no visible binding for global variable ..."
-##  will be issued. I could not find a solution for this apart from the following:
+##  will be issued. I could not find a solution for this apart from the following,
+##  see the discussion on R-help:
+##      https://stat.ethz.ch/pipermail/r-devel/2014-August/069665.html
+##
 ##  - call data() with a character string, i.e. data("diabetes") instead of data(diabetes)
 ##  - use the following construct for each data set:
 ##            data("salmon", package="rrcov", envir=environment)
@@ -61,14 +64,16 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\nDiabetes (rrcov): n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "MLL" = {
-            data("mll")
+            data("mll", envir=environment())
+            mll <- get("mll", envir=environment())
             x <- mll[, -ncol(mll)]
             grp <- mll$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\nMLL: n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Gastro" = {
-            data("gastro")
+            data("gastro", envir=environment())
+            gastro <- get("gastro", envir=environment())
             x <- gastro[, -ncol(gastro)]
             grp <- gastro$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
@@ -139,7 +144,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Ionosphere" = {
-            data("ionosphere")
+            data("ionosphere", envir=environment())
+            ionosphere <- get("ionosphere", envir=environment())
             ##  Ionosphere Data Set
             ##  UCI:    https://archive.ics.uci.edu/ml/datasets/ionosphere
             x <- ionosphere[, -ncol(ionosphere)]
@@ -148,7 +154,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Bupa" = {
-            data("bupa")
+            data("bupa", envir=environment())
+            bupa <- get("bupa", envir=environment())
             ##  UCI:    https://archive.ics.uci.edu/ml/datasets/liver+disorders
             x <- bupa[, -ncol(bupa)]
             grp <- bupa[, ncol(bupa)]
@@ -211,7 +218,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
         "Vehicle" = {
             ##  Statlog (Vehicle Silhouettes) Data Set
             ##  UCI:    https://archive.ics.uci.edu/ml/datasets/Statlog+%28Vehicle+Silhouettes%29
-            data("vehicle")
+            data("vehicle", envir=environment())
+            vehicle <- get("vehicle", envir=environment())
             x <- vehicle[, -ncol(vehicle)]
             grp <- vehicle[, ncol(vehicle)]
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
@@ -220,7 +228,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
         "Ecoli" = {
             ##  Ecoli Data Set
             ##  UCI:    https://archive.ics.uci.edu/ml/datasets/ecoli
-            data("ecoli")
+            data("ecoli", envir=environment())
+            ecoli <- get("ecoli", envir=environment())
             x <- ecoli[, -ncol(ecoli)]
             grp <- ecoli[, ncol(ecoli)]
 
@@ -235,7 +244,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
         "Heart" = {
             ##  Heart Disease Data Set
             ##  UCI:    https://archive.ics.uci.edu/ml/datasets/heart+disease
-            data("heartc")
+            data("heartc", envir=environment())
+            heartc <- get("heartc", envir=environment())
             ## remove the 6 missing values
             heartc <- heartc[!is.na(heartc[,12]) & !is.na(heartc[,13]),]
             x <- heartc[, -ncol(heartc)]
@@ -265,7 +275,8 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             ##x <- t(exprs(colonCA))
             ##grp <- colonCA$class
 
-            data("colon")
+            data("colon", envir=environment())
+            colon <- get("colon", envir=environment())
             x <- colon[, -ncol(colon)]
             grp <- colon$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
@@ -278,22 +289,24 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             ##x <- t(exprs(Golub_Merge))
             ##grp <- Golub_Merge$ALL.AML
 
-            data("golub_bioconductor")
+            data("golub_bioconductor", envir=environment())
+            golub_bioconductor <- get("golub_bioconductor", envir=environment())
             x <- as.matrix(golub_bioconductor[, -ncol(golub_bioconductor)])
             grp <- golub_bioconductor$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Leukemia_big" = {
-            data("golub")
+            data("golub", envir=environment())
+            leukemia_big <- get("leukemia_big", envir=environment())
             x <- as.matrix(leukemia_big[, -ncol(leukemia_big)])
             grp <- leukemia_big$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "Leukemia_small" = {
-            data("golub")
-            x <- as.matrix(leukemia_small[, -ncol(leukemia_small)])
+            data("golub", envir=environment())
+            leukemia_small <- get("leukemia_small", envir=environment())
             grp <- leukemia_small$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
@@ -326,21 +339,25 @@ get_data <- function(dname=c("Iris", "Wine", "Diabetes", "Crabs",
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "ALL_train" = {
-            data("Yeoh2002")
+            data("Yeoh2002", envir=environment())
+            ALL_train <- get("ALL_train", envir=environment())
             x <- as.matrix(ALL_train[, -ncol(ALL_train)])
             grp <- ALL_train$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "ALL_test" = {
-            data("Yeoh2002")
+            data("Yeoh2002", envir=environment())
+            ALL_test <- get("ALL_test", envir=environment())
             x <- as.matrix(ALL_test[, -ncol(ALL_test)])
             grp <- ALL_test$Class
             ret <- list(name=dname, x=x, grp=grp, n=nrow(x), p=ncol(x), ng=length(table(grp)))
             cat("\n", dname, ": n=", ret$n, "p=", ret$p, "ng=", ret$ng, "...\n")
         },
         "ALL" = {
-            data("Yeoh2002")
+            data("Yeoh2002", envir=environment())
+            ALL_train <- get("ALL_train", envir=environment())
+            ALL_test <- get("ALL_test", envir=environment())
             xx <- rbind(ALL_train, ALL_test)
             x <- as.matrix(xx[, -ncol(xx)])
             grp <- xx$Class

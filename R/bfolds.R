@@ -1,7 +1,28 @@
-## Balanced folds for cross validation
-##  from rda
+######
+##  VT::15.02.2023
 ##
-bfolds <- function (y, nfolds = min(min(table(y)), 10))
+##
+##  roxygen2::roxygenise("C:/users/valen/onedrive/myrepo/R/mlrob", load_code=roxygen2:::load_installed)
+##
+#' Balanced folds for cross-validation for classification
+#'
+#' @description Generates balanced folds for cross-validation for classification
+#'
+#' @param y a factor with class labels
+#' @param nfolds number of folds, defaults to 10 but should not be
+#'  larger than the number of objects in the smallest class
+#'
+#' @return  a list of \code{nfolds} vectors of length approx \code{length(y)/nfolds} each
+#'
+#' @examples
+#'
+#'  folds <- bfolds(iris$Species)
+#'  length(folds)
+#'  folds[[1]]
+#'
+#' @export
+#' @author Valentin Todorov \email{valentin@@todorov.at}
+bfolds <- function (y, nfolds=min(min(table(y)), 10))
 {
 
     permute.rows <- function (x){

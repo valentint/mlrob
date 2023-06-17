@@ -188,7 +188,7 @@ plot.LdaSparse <- function(x, ...) {
     firstscores <- NULL
     secondscores <- NULL
     colnames(proj) <- c("firstscores", "secondscores","grp", "grppred")
-    gg <- ggplot(proj, aes(firstscores, secondscores, colour = grp, shape = grppred))
+    gg <- ggplot(proj, aes_string("firstscores", "secondscores", colour="grp", shape="grppred"))
     gg <- gg + geom_point()
     gg <- gg + xlab("First Fisher scores") + ylab("Second Fisher scores")
     print(gg)

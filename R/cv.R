@@ -1,123 +1,108 @@
-library(rrcov)
-library(sparseLDA)
-library(pracma)
-
 if(FALSE)
 {
 
-data(fruit)
-obj <- LdaClassic(cultivar~., data=fruit)
-cv(obj)
-rrcov:::.CV(obj)
+    library(rrcov)
+    library(mlrob)
+    data("fruit", package="rrcov")
+    obj <- LdaClassic(cultivar~., data=fruit)
+    cv(obj)
 
+    obj <- LdaClassic(Species~., data=iris)
+    obj <- Linda(Species~., data=iris, l1med=TRUE)
+    cv(obj)
 
-obj <- LdaClassic(Species~., data=iris)
-##obj <- Linda(Species~., data=iris)
-cv(obj)
-rrcov:::.CV(obj)
+    library(tclust)
+    data(swissbank)
+    head(swissbank)
 
-library(tclust)
-data(swissbank)
-head(swissbank)
+    swissbank$Group <- as.factor(c(rep("genuine", 100), rep("counterfeit", 100)))
 
-swissbank$Group <- as.factor(c(rep("genuine", 100), rep("counterfeit", 100)))
+    ## obj <- LdaClassic(Group~., data=swissbank)
+    obj <- Linda(Group~., data=swissbank, cov.control=CovControlMrcd(alpha=0.75))
 
-## obj <- LdaClassic(Group~., data=swissbank)
-obj <- Linda(Group~., data=swissbank, cov.control=CovControlMrcd(alpha=0.75))
+    cv(obj)
 
-cv(obj)
-rrcov:::.CV(obj)
+    data(hemophilia)
+    obj <- Linda(as.factor(gr)~., data=hemophilia)
+    cv(obj)
 
-data(hemophilia)
-obj <- Linda(as.factor(gr)~., data=hemophilia)
-cv(obj)
-rrcov:::.CV(obj)
+    data(soil)
+    soil1983 <- soil[soil$D == 0, -2]       # only 1983, remove column D (always 0)
+    obj <- Linda(F~., data=soil1983, l1med=TRUE)
+    cv(obj)
 
-data(soil)
-soil1983 <- soil[soil$D == 0, -2]       # only 1983, remove column D (always 0)
-obj <- Linda(F~., data=soil1983, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
+    data(diabetes, package="rrcov")
+    obj <- Linda(group~., data=diabetes, l1med=TRUE)
+    cv(obj)
 
-data(diabetes, package="rrcov")
-obj <- Linda(group~., data=diabetes, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
+    data(salmon)
+    obj <- Linda(Origin~., data=salmon, l1med=TRUE)
+    cv(obj)
 
-data(salmon)
-obj <- Linda(Origin~., data=salmon, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
+    data(pottery)
+    obj <- Linda(origin~., data=pottery, l1med=TRUE)
+    cv(obj)
 
-data(pottery)
-obj <- Linda(origin~., data=pottery, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
+    data(olitos)
+    obj <- Linda(grp~., data=olitos, l1med=TRUE)
+    cv(obj)
 
-data(olitos)
-obj <- Linda(grp~., data=olitos, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
-
-data(fish)
-# remove observation #14 containing missing value
-fish <- fish[-14,]
-# The height and width are calculated as percentages
-#   of the third length variable
-fish[,5] <- fish[,5]*fish[,4]/100
-fish[,6] <- fish[,6]*fish[,4]/100
-obj <- Linda(Species~., data=fish, l1med=TRUE)
-cv(obj)
-rrcov:::.CV(obj)
+    data(fish)
+    # remove observation #14 containing missing value
+    fish <- fish[-14,]
+    # The height and width are calculated as percentages
+    #   of the third length variable
+    fish[,5] <- fish[,5]*fish[,4]/100
+    fish[,6] <- fish[,6]*fish[,4]/100
+    obj <- Linda(Species~., data=fish, l1med=TRUE)
+    cv(obj)
 
 
 }
 
 if(FALSE) {
-library(pracma)
 
 #   iris
-    grp <- iris$Species
-    x <- iris[, 1:4]
-    obj <- LdaFisher(x, grp)
+    xx <- get_data("Iris")
+    obj <- LdaFisher(xx$x, xx$grp)
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
-    obj <- LdaPca(x, grp, k=2, preprocess="sphere")
+    obj <- LdaPca(xx$x, xx$grp, k=2, preprocess="sphere")
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
 ## wine data
-    library(MBCbook)
-    data(wine27)
-
-    x <- wine27[, 1:(ncol(wine27)-2)]
-#    x <- scale(x)
-    grp <- wine27$Type
-
-    obj <- LdaFisher(x, grp)
+    xx <- get_data("Wine")
+    obj <- LdaFisher(xx$x, xx$grp)
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
-    obj <- LdaPca(x, grp, k=2, preprocess="sphere")
+    obj <- LdaPca(xx$x, xx$grp, k=2, preprocess="sphere")
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
 ## diabetes data
-    data(diabetes, package="rrcov")
-    x <- diabetes[, c("glucose", "insulin", "sspg")]
-    grp <- diabetes$group
-
-    obj <- LdaFisher(x, grp)
+    xx <- get_data("Diabetes")
+    obj <- LdaFisher(xx$x, xx$grp)
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
-    obj <- LdaPca(x, grp, k=2, preprocess="sphere")
+    obj <- LdaPca(xx$x, xx$grp, k=2, preprocess="sphere")
     holdout(obj)
+    cv(obj)
+    loocv(obj)
 
 ## NIR
-    library(MBCbook)
-    data(NIR)
-
-    grp <- NIR[,1]
-    x <- NIR[, -1]
-    obj <- LdaPca(x, grp, k=2)
+    xx <- get_data("NIR")
+    obj <- LdaPca(xx$x, xx$grp, k=2)
     holdout(obj)
+    cv(obj)
 
     xx <- get_data("MLL")
     obj <- LdaPca(xx$x, xx$grp, k=2)
@@ -127,10 +112,16 @@ library(pracma)
 
 cv <- function(obj, k=10){
 
-    accur <- function(actual, predicted)
-    {
+    accur <- function(actual, predicted) {
         tab <- table(actual, predicted)
         sum(tab[row(tab)==col(tab)])/sum(tab)
+    }
+
+    is_singular <- function (mat) {
+        p <- ncol(mat)
+        if (!is.qr(mat))
+            mat <- qr(mat)
+        return(mat$rank < p)
     }
 
     if(missing(obj))
@@ -148,44 +139,34 @@ cv <- function(obj, k=10){
         method <-  if("method" %in% names(obj)) obj$method else class(obj)
     }
 
-    require(pls)
     glev <- names(table(grp))
-    g <- length(glev)
+    ng <- length(glev)
     nj <- as.numeric(table(grp))
     k <- min(min(table(grp)), k)           # number of folds not less than number of obs in a class
+    folds <- bfolds(grp, k)
 
     acc <- rep(NA, k)    # accuracies
     accrob <- rep(NA, k) # accuracies robust
-    seg <- list(g)
-    for(j in 1:g) {
-        seg[[j]] <- cvsegments(nj[j], k)
-    }
 
     for(kk in 1:k) { # one fold
 
-        ## create train and test datasets for the k-th fold
-        dtrain <- NULL; dtest <- NULL; gtrain <- NULL; gtest <- NULL
-        for(j in 1:g)
-        {
-            datj <- data[grp == glev[j],]
-            indj <- seg[[j]][[kk]]
-            dtrain <- rbind(dtrain, datj[-indj,])
-            dtest <- rbind(dtest, datj[indj,])
-            gtrain <- c(gtrain, rep(glev[j], nrow(datj)-length(indj)))
-            gtest <- c(gtest, rep(glev[j], length(indj)))
-        }
+        ind <- folds[[kk]]
+        dtest <- data[ind, ]
+        gtest <- grp[ind]
+        dtrain <- data[-ind,]
+        gtrain <- grp[-ind]
 
         #resj <- get(dmethod)(dtrain, gtrain, method=method)
         resj <- if(is(obj, "LdaClassic")) {
-                    LdaClassic(dtrain, gtrain)
+                    rrcov::LdaClassic(dtrain, gtrain)
                 } else if(is(obj, "Linda")){
-                    Linda(dtrain, gtrain, method=method, l1med=obj@l1med, cov.control=obj@control)
+                    rrcov::Linda(dtrain, gtrain, method=method, l1med=obj@l1med, cov.control=obj@control)
                 } else if(is(obj, "QdaClassic")){
-                    QdaClassic(dtrain, gtrain)
+                    rrcov::QdaClassic(dtrain, gtrain)
                 } else if(is(obj, "QdaCov")){
-                    QdaCov(dtrain, gtrain, method=obj@control)
+                    rrcov::QdaCov(dtrain, gtrain, method=obj@control)
                 } else if(is(obj, "SosDiscRobust")){
-                    SosDiscRobust(dtrain, gtrain, lambda=obj@lambda)
+                    rrcovHD::SosDiscRobust(dtrain, gtrain, lambda=obj@lambda)
                 } else if(is(obj, "LdaFisher")){
                     LdaFisher(dtrain, gtrain)
                 } else if(is(obj, "LdaPca")){
@@ -225,9 +206,9 @@ cv <- function(obj, k=10){
         if(typeof(resj) == "S4" && "cov" %in% slotNames(class(resj)))
         {
             md2 <- rep(NA, length(gtest))
-            for(j in 1:g){
+            for(j in 1:ng){
                 xcov <- if(is(obj, "QdaClassic") | is(obj, "QdaCov")) resj@cov[,,j] else resj@cov
-                xinv <- if(!rrcov:::.isSingular(xcov))  solve(xcov) else rrcov:::.pinv(xcov)
+                xinv <- if(is_singular(xcov))  solve(xcov) else pracma::pinv(xcov)
 
                 md2[gtest==glev[j]] <- mahalanobis(dtest[gtest==glev[j],], resj@center[j,], xinv, inverted=TRUE)
             }
@@ -277,84 +258,84 @@ holdout <- function(obj, nsim=10, seed, test_size=0.33)
 
     acctrain <- acctest <- rep(NA, nsim)    # accuracies
 
-for (iii in 1:nsim) {
+    for (iii in 1:nsim) {
 
-    ## Split the data into train and test
+        ## Split the data into train and test
 
-    dtrain <- dtest <- NULL
+        dtrain <- dtest <- NULL
 
-    ## Resample
-    df <- data1[sample(1:nrow(data1), nrow(data1)), ]
+        ## Resample
+        df <- data1[sample(1:nrow(data1), nrow(data1)), ]
 
-    for(i in levels(df$grp))
-    {
-        x <- df[df$grp == i, ]
-        n <- nrow(x)
-        ntrain <- n - round(n - (1-test_size) * n)
-        ind <- sample(1:n, ntrain)
-        xtrain <- x[ind,]
-        xtest <- x[-ind,]
-        dtrain <- rbind(dtrain, xtrain)
-        dtest <- rbind(dtest, xtest)
+        for(i in levels(df$grp))
+        {
+            x <- df[df$grp == i, ]
+            n <- nrow(x)
+            ntrain <- n - round(n - (1-test_size) * n)
+            ind <- sample(1:n, ntrain)
+            xtrain <- x[ind,]
+            xtest <- x[-ind,]
+            dtrain <- rbind(dtrain, xtrain)
+            dtest <- rbind(dtest, xtest)
+        }
+
+        gtrain <- dtrain[, ncol(dtrain)]
+        dtrain <- dtrain[, -ncol(dtrain)]
+        gtest <- dtest[, ncol(dtest)]
+        dtest <- dtest[, -ncol(dtest)]
+
+        resj <- if(is(obj, "LdaClassic")) {
+                    rrcov::LdaClassic(dtrain, gtrain)
+                } else if(is(obj, "Linda")){
+                    rrcov::Linda(dtrain, gtrain, method=method, l1med=obj@l1med, cov.control=obj@control)
+                } else if(is(obj, "QdaClassic")){
+                    rrcov::QdaClassic(dtrain, gtrain)
+                } else if(is(obj, "QdaCov")){
+                    rrcov::QdaCov(dtrain, gtrain, method=obj@control)
+                } else if(is(obj, "SosDiscRobust")){
+                    rrcovHD::SosDiscRobust(dtrain, gtrain, lambda=obj@lambda)
+                } else if(is(obj, "LdaFisher")){
+                    LdaFisher(dtrain, gtrain)
+                } else if(is(obj, "LdaPca")){
+                    LdaPca(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
+                } else if(is(obj, "LdaRotatedCS")){
+                    LdaRotatedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
+                } else if(is(obj, "LdaPenalizedCS")){
+                    LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
+                } else if(is(obj, "LdaPenalizedCSV2")){
+                    LdaPenalizedCSV2(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
+                } else if(is(obj, "LdaSparse")){
+                    LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
+                } else if(is(obj, "LdaNSC")){
+                    LdaNSC(dtrain, gtrain, threshold=obj$threshold)
+                } else if(is(obj, "LdaRegularized")){
+                    LdaRegularized(dtrain, gtrain, alpha=obj$alpha, delta=obj$delta, regularization=obj$regularization)
+                } else {
+                    stop("ERROR: unknown class")
+                }
+
+        resjpred <- predict(resj, dtest)
+        gpred <- if(is(obj, "LdaFisher") ||
+                    is(obj, "LdaPca") ||
+                    is(obj, "LdaRotatedCS") ||
+                    is(obj, "LdaPenalizedCS") ||
+                    is(obj, "LdaPenalizedCSV2") ||
+                    is(obj, "LdaSparse") ||
+                    is(obj, "LdaNSC") ||
+                    is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
+        acctest[iii] <- accur(gtest, gpred)
+
+        resjpred <- predict(resj, dtrain)
+        gpred <- if(is(obj, "LdaFisher") ||
+                    is(obj, "LdaPca") ||
+                    is(obj, "LdaRotatedCS") ||
+                    is(obj, "LdaPenalizedCS") ||
+                    is(obj, "LdaPenalizedCSV2") ||
+                    is(obj, "LdaSparse") ||
+                    is(obj, "LdaNSC") ||
+                    is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
+        acctrain[iii] <- accur(gtrain, gpred)
     }
-
-    gtrain <- dtrain[, ncol(dtrain)]
-    dtrain <- dtrain[, -ncol(dtrain)]
-    gtest <- dtest[, ncol(dtest)]
-    dtest <- dtest[, -ncol(dtest)]
-
-    resj <- if(is(obj, "LdaClassic")) {
-                LdaClassic(dtrain, gtrain)
-            } else if(is(obj, "Linda")){
-                Linda(dtrain, gtrain, method=method, l1med=obj@l1med, cov.control=obj@control)
-            } else if(is(obj, "QdaClassic")){
-                QdaClassic(dtrain, gtrain)
-            } else if(is(obj, "QdaCov")){
-                QdaCov(dtrain, gtrain, method=obj@control)
-            } else if(is(obj, "SosDiscRobust")){
-                SosDiscRobust(dtrain, gtrain, lambda=obj@lambda)
-            } else if(is(obj, "LdaFisher")){
-                LdaFisher(dtrain, gtrain)
-            } else if(is(obj, "LdaPca")){
-                LdaPca(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
-            } else if(is(obj, "LdaRotatedCS")){
-                LdaRotatedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess)
-            } else if(is(obj, "LdaPenalizedCS")){
-                LdaPenalizedCS(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
-            } else if(is(obj, "LdaPenalizedCSV2")){
-                LdaPenalizedCSV2(dtrain, gtrain, k=obj$k, preprocess=obj$preprocess, prednorm=obj$prednorm)
-            } else if(is(obj, "LdaSparse")){
-                LdaSparse(dtrain, gtrain, lambda=obj$lambda, numVars=obj$numVars, maxRSS=obj$maxRSS)
-            } else if(is(obj, "LdaNSC")){
-                LdaNSC(dtrain, gtrain, threshold=obj$threshold)
-            } else if(is(obj, "LdaRegularized")){
-                LdaRegularized(dtrain, gtrain, alpha=obj$alpha, delta=obj$delta, regularization=obj$regularization)
-            } else {
-                stop("ERROR: unknown class")
-            }
-
-    resjpred <- predict(resj, dtest)
-    gpred <- if(is(obj, "LdaFisher") ||
-                is(obj, "LdaPca") ||
-                is(obj, "LdaRotatedCS") ||
-                is(obj, "LdaPenalizedCS") ||
-                is(obj, "LdaPenalizedCSV2") ||
-                is(obj, "LdaSparse") ||
-                is(obj, "LdaNSC") ||
-                is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
-    acctest[iii] <- accur(gtest, gpred)
-
-    resjpred <- predict(resj, dtrain)
-    gpred <- if(is(obj, "LdaFisher") ||
-                is(obj, "LdaPca") ||
-                is(obj, "LdaRotatedCS") ||
-                is(obj, "LdaPenalizedCS") ||
-                is(obj, "LdaPenalizedCSV2") ||
-                is(obj, "LdaSparse") ||
-                is(obj, "LdaNSC") ||
-                is(obj, "LdaRegularized")) resjpred$grp else resjpred@classification
-    acctrain[iii] <- accur(gtrain, gpred)
-}
 
     list(acctrain=mean(acctrain), acctest=mean(acctest),
         eaertrain=round(100*(1-mean(acctrain)), 1), eaertest=round(100*(1-mean(acctest)), 1))
